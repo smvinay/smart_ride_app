@@ -34,11 +34,44 @@ class TripNotifier extends StateNotifier<List<Trip>> {
   }
 
   void _simulateRide(Trip trip) {
-    Timer(const Duration(seconds: 3),
-            () => updateStatus(trip.id, 'Driver Assigned'));
-    Timer(const Duration(seconds: 6),
-            () => updateStatus(trip.id, 'Ride Started'));
-    Timer(const Duration(seconds: 10),
-            () => updateStatus(trip.id, 'Completed'));
+    // Step 1: Driver assigned
+    Timer(const Duration(seconds: 3), () {
+      updateStatus(trip.id, 'Driver Assigned');
+    });
+
+    // Step 2: Ride started
+    Timer(const Duration(seconds: 6), () {
+      updateStatus(trip.id, 'Ride Started');
+      _startFareUpdates(trip);
+    });
+
+    // Step 3: Ride completed
+    Timer(const Duration(seconds: 14), () {
+      updateStatus(trip.id, 'Completed');
+    });
   }
+
+  void _startFareUpdates(Trip trip) {
+    Timer.periodic(const Duration(seconds: 2), (timer) {
+      final currentTrip = box.get(trip.id);
+
+      if (currentTrip == null || currentTrip.status == 'Completed') {
+        timer.cancel();
+        return;
+      }
+
+      currentTrip.fare += 10; // simple fare increase
+      currentTrip.save();
+
+      state = [...state]; // notify UI
+    });
+  }
+
+  void deleteTrip(String id) {
+    box.delete(id);
+    state = state.where((t) => t.id != id).toList();
+  }
+
+
+
 }
