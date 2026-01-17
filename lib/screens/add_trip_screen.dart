@@ -5,6 +5,8 @@ import '../models/trip.dart';
 import '../state/trip_notifier.dart';
 
 class AddTripScreen extends ConsumerStatefulWidget {
+  const AddTripScreen({super.key});
+
   @override
   ConsumerState<AddTripScreen> createState() => _AddTripScreenState();
 }
@@ -12,6 +14,8 @@ class AddTripScreen extends ConsumerStatefulWidget {
 class _AddTripScreenState extends ConsumerState<AddTripScreen> {
   final pickupCtrl = TextEditingController();
   final dropCtrl = TextEditingController();
+  final fareCtrl = TextEditingController(text: '50');
+
   String rideType = 'Mini';
 
   @override
@@ -24,33 +28,53 @@ class _AddTripScreenState extends ConsumerState<AddTripScreen> {
           children: [
             TextField(
               controller: pickupCtrl,
-              decoration: const InputDecoration(labelText: 'Pickup Location'),
+              decoration: const InputDecoration(
+                labelText: 'Pickup Location',
+                border: OutlineInputBorder(),
+              ),
             ),
+            const SizedBox(height: 12),
             TextField(
               controller: dropCtrl,
-              decoration: const InputDecoration(labelText: 'Drop Location'),
+              decoration: const InputDecoration(
+                labelText: 'Drop Location',
+                border: OutlineInputBorder(),
+              ),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               value: rideType,
+              decoration: const InputDecoration(
+                labelText: 'Ride Type',
+                border: OutlineInputBorder(),
+              ),
               items: ['Mini', 'Sedan', 'Auto', 'Bike']
                   .map(
-                    (e) => DropdownMenuItem(
-                  value: e,
-                  child: Text(e),
-                ),
+                    (e) => DropdownMenuItem(value: e, child: Text(e)),
               )
                   .toList(),
-              onChanged: (val) => setState(() => rideType = val!),
-              decoration: const InputDecoration(labelText: 'Ride Type'),
+              onChanged: (v) => setState(() => rideType = v!),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: fareCtrl,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Base Fare',
+                border: OutlineInputBorder(),
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 48),
+              ),
               onPressed: () {
                 if (pickupCtrl.text.isEmpty ||
-                    dropCtrl.text.isEmpty) {
+                    dropCtrl.text.isEmpty ||
+                    fareCtrl.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('All fields required')),
+                    const SnackBar(content: Text('All fields are required')),
                   );
                   return;
                 }
@@ -61,7 +85,7 @@ class _AddTripScreenState extends ConsumerState<AddTripScreen> {
                     pickup: pickupCtrl.text,
                     drop: dropCtrl.text,
                     rideType: rideType,
-                    fare: 100,
+                    fare: double.parse(fareCtrl.text),
                     status: 'Requested',
                     dateTime: DateTime.now(),
                   ),
@@ -77,4 +101,3 @@ class _AddTripScreenState extends ConsumerState<AddTripScreen> {
     );
   }
 }
-
